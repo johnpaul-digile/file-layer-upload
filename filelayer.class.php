@@ -170,7 +170,7 @@ class FileLayer {
                             'Data_Type' => $this->data['fileType'],
                             'Added_Date' => $dateTime,
                             'Offset' => 0,
-                            'Data_Owner_PID' => $project['parent_project_id_number'] ? $project['parent_project_id_number'] : $project['project_id_number'],
+                            'Data_Owner_PID' => $project['parent_project_id_number'] ? $project['parent_project_id_number'] : $project['project_id_number'], //todo -> project_id_number
                             'Added_By' => $this->data['email'],
                             'Style' => null,
                             'Modified_By' => null,
@@ -268,21 +268,21 @@ class FileLayer {
                 }
 
                 $kmlaicParams = $this->data['fileType'] === 'AIC' ? [
-                    'Project_Id' => $project['project_id_number'],
-                    'Package_Id' => $project['parent_project_id_number'] ?? $project['project_id_number'],
+                    'Project_Id' => $project['project_id_number'],//todo - > for child
+                    'Package_Id' => $project['parent_project_id_number'] ?? $project['project_id_number'],//todo - > for parent
                     'Image_Type' => $this->data['fileType'],
                     'Image_Captured_Date' => $dateTime,
                     'Registered_By' => $this->data['email'],
                     'Registered_Date' => $dateTime,
                     'Image_URL' => 'S3-' . $keyOrFolder,
-                    'Routine_Id' => 'aic_Q' . ceil(date('n') / 3) . '_' . date('Y'),
+                    'Routine_Id' => 'aic_Q' . ceil(date('n') / 3) . '_' . date('Y'),//todo -> current month
                     'Routine_Type' => 0,
                     'Use_Name' => null,
                     'Image_Group' => null,
                     'Image_SubGroup' => null,
                     'Owner_Id' => $project['project_id_number'],
                     'Share' => 0,
-                    'Owner_AIC_ID' => $project['parent_project_id_number'] ?? $project['project_id_number']
+                    'Owner_AIC_ID' => $project['parent_project_id_number'] ?? $project['project_id_number'] // pending
                 ] : [
                     'data_pool' => [
                         'Data_Name' => $savedFileName,
