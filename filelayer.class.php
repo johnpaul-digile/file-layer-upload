@@ -120,7 +120,7 @@ class FileLayer {
                         $key = $object['Key'];
                         // Check SHP file extensions
                         $fileType = strtolower(pathinfo($key, PATHINFO_EXTENSION));
-                        $allowedExtensions = ['shp', 'shx', 'dbf', 'cpg', 'prj'];
+                        $allowedExtensions = ['shp', 'shx', 'dbf', 'sbn', 'sbx', 'fbn', 'fbx', 'ain', 'aih', 'atx', 'ixs', 'mxs', 'prj', 'xml', 'cpg'];
                         
                         if (!in_array($fileType, $allowedExtensions)) {
                             $this->response['message'] = "Invalid file type: {$key}\n";
@@ -170,7 +170,7 @@ class FileLayer {
                             'Data_Type' => $this->data['fileType'],
                             'Added_Date' => $dateTime,
                             'Offset' => 0,
-                            'Data_Owner_PID' => $project['parent_project_id_number'] ? $project['parent_project_id_number'] : $project['project_id_number'], //todo -> project_id_number
+                            'Data_Owner_PID' => $project['project_id_number'],
                             'Added_By' => $this->data['email'],
                             'Style' => null,
                             'Modified_By' => null,
@@ -268,21 +268,21 @@ class FileLayer {
                 }
 
                 $kmlaicParams = $this->data['fileType'] === 'AIC' ? [
-                    'Project_Id' => $project['project_id_number'],//todo - > for child
-                    'Package_Id' => $project['parent_project_id_number'] ?? $project['project_id_number'],//todo - > for parent
+                    'Project_Id' => $project['parent_project_id_number'] ?? $project['project_id_number'],
+                    'Package_Id' => $project['project_id_number'],
                     'Image_Type' => $this->data['fileType'],
                     'Image_Captured_Date' => $dateTime,
                     'Registered_By' => $this->data['email'],
                     'Registered_Date' => $dateTime,
                     'Image_URL' => 'S3-' . $keyOrFolder,
-                    'Routine_Id' => 'aic_Q' . ceil(date('n') / 3) . '_' . date('Y'),//todo -> current month
+                    'Routine_Id' => 'aic_monthly_' . (date('n') - 1) . '_' . date('Y'),
                     'Routine_Type' => 0,
                     'Use_Name' => null,
                     'Image_Group' => null,
                     'Image_SubGroup' => null,
                     'Owner_Id' => $project['project_id_number'],
                     'Share' => 0,
-                    'Owner_AIC_ID' => $project['parent_project_id_number'] ?? $project['project_id_number'] // pending
+                    'Owner_AIC_ID' => 0
                 ] : [
                     'data_pool' => [
                         'Data_Name' => $savedFileName,
@@ -292,7 +292,7 @@ class FileLayer {
                         'Data_Type' => $this->data['fileType'],
                         'Added_Date' => $dateTime,
                         'Offset' => 0,
-                        'Data_Owner_PID' => $project['parent_project_id_number'] ? $project['parent_project_id_number'] : $project['project_id_number'],
+                        'Data_Owner_PID' => $project['parent_project_id_number'],
                         'Added_By' => $this->data['email'],
                         'Style' => null,
                         'Modified_By' => null,
