@@ -41,21 +41,72 @@ class FileLayer {
 
         // Create S3 client
         $this->s3Client = new S3Client([
-            'region' => 'ap-southeast-2', // change to your region
+            'region'  => $_ENV['AWS_REGION'],
+            'endpoint' => $_ENV['AWS_ENDPOINT'],
+            'use_path_style_endpoint' => true,
             'version' => 'latest',
             'credentials' => [
                 'key'    => $_ENV['AWS_CLIENT'],
                 'secret' => $_ENV['AWS_SECRET']
             ],
-            'http' => [
-                'verify' => false  // disables SSL check 🚨
-            ]
+            // 'http' => [
+            //     'verify' => false  // disables SSL check 
+            // ]
         ]);
 
         // Setup adapter, filesystem and database connection
         $this->adapter = new AwsS3V3Adapter($this->s3Client, $_ENV['AWS_BUCKET']);
         $this->filesystem = new Filesystem($this->adapter);
         $this->DB = new DB();
+    }
+
+    /**
+     * List files/folders in S3 folder
+     * 
+     * @return array
+     */
+    public function listFolderFiles() {
+        try {
+            $prefix = $this->data['prefix'];
+            $objects = $this->s3Client->listObjectsV2([
+                'Bucket' => $_ENV['AWS_BUCKET'],
+                'Prefix' => $prefix,
+                'Delimiter' => '/',
+            ]);
+
+            $folders = [];
+            $files   = [];
+
+            /** Folders */
+            foreach ($objects['CommonPrefixes'] ?? [] as $prefix) {
+                $folders[] = $prefix['Prefix'];
+            }
+
+            $url = '';
+
+            /** Files */
+            foreach ($objects['Contents'] ?? [] as $object) {
+                // Skip the folder placeholder itself
+                if ($object['Key'] !== $prefix) {
+                    $files[] = $object['Key'];
+                    echo "Downloading: " . $object['Key'] . "\n";
+                }
+            }
+
+            $this->response['success'] = true;
+            $this->response['message'] = 'Files retrieved successfully.';
+            $this->response['data'] = [
+                'folders' => $folders,
+                'files' => $files,
+                'bucket' => $_ENV['AWS_BUCKET']
+            ];
+
+            return $this->response;
+
+        } catch (Aws\Exception\AwsException $e) {
+            $this->response['message'] = "Error retrieving files: " . $e->getMessage();
+            return $this->response;
+        }
     }
 
     /**
