@@ -114,6 +114,11 @@ switch ($_POST['op']) {
             'success' => true
         ]);
         break;
+    case 'list-folder-files':
+        $fileLayerClass = new FileLayer($_POST);
+        $response = $fileLayerClass->listFolderFiles();
+        echo json_encode($response);
+        break;
     default:
         echo json_encode([
             'message' => 'Invalid request.',
